@@ -4,6 +4,24 @@ cmake_minimum_required(VERSION 3.7)
 project(MediaDemoRecreation)
 set(MOD_NAME MediaDemoRecreation CACHE STRING "The mod directory to look into")
 
+set(RETRO_REVISION 3 CACHE STRING "What revision to compile for. Defaults to Origins = 3")
+set(RETRO_MOD_LOADER_VER 2 CACHE STRING "Sets the mod loader version. Defaults to latest")
+
+option(MANIA_FIRST_RELEASE "Whether or not to build Mania's first release. Defaults to false" OFF)
+if(MANIA_FIRST_RELEASE)
+    set(MANIA_PREPLUS ON)
+else()
+    option(MANIA_PREPLUS "Whether or not to build Mania pre-plus. Defaults to false" OFF)
+endif()
+
+if(NOT MANIA_PREPLUS)
+    set(GAME_VERSION 6 CACHE STRING "The game version to use. Defaults to 6 == Last Steam release")
+else()
+    set(GAME_VERSION 3 CACHE STRING "The game version to use. Defaults to 3 == Last pre-plus release")
+endif()
+
+option(MOD_INCLUDE_EDITOR "Whether or not to include editor functions. Defaults to true" ON)
+
 set(OUTPUT_NAME "MediaDemoRecreation" CACHE STRING "The name of the built library")
 
 add_library(MediaDemoRecreation SHARED
@@ -27,7 +45,16 @@ target_include_directories(MediaDemoRecreation PRIVATE
 )
 
 set_target_properties(MediaDemoRecreation PROPERTIES OUTPUT_NAME ${OUTPUT_NAME})
-target_compile_definitions(MediaDemoRecreation PRIVATE RETRO_REVISION=${RETRO_REVISION})
+target_compile_definitions(MediaDemoRecreation PRIVATE
+	RETRO_REVISION=${RETRO_REVISION}
+	RETRO_USE_MOD_LOADER=1
+	RETRO_MOD_LOADER_VER=${RETRO_MOD_LOADER_VER}
+	GAME_INCLUDE_EDITOR=$<BOOL:${MOD_INCLUDE_EDITOR}>
+	MANIA_PREPLUS=$<BOOL:${MANIA_PREPLUS}>
+	MANIA_FIRST_RELEASE=$<BOOL:${MANIA_FIRST_RELEASE}>
+	GAME_VERSION=${GAME_VERSION}
+	GAME_TYPE=1
+)
 
 unset(MOD_NAME CACHE)
 unset(OUTPUT_NAME CACHE)
